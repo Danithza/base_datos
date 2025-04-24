@@ -11,7 +11,7 @@ window.onload = async () => {
 };
 
 async function cargarProductosCliente() {
-  const res = await fetch('/api/productos');
+  const res = await fetch('http://localhost:3000/api/productos');
   const productos = await res.json();
 
   console.log("🛒 Productos cliente:", productos);
@@ -26,7 +26,7 @@ async function cargarProductosCliente() {
 }
 
 async function cargarProductosAdmin() {
-  const res = await fetch('/api/productos');
+  const res = await fetch('http://localhost:3000/api/productos');
   const productos = await res.json();
 
   console.log("📦 Productos admin:", productos);
