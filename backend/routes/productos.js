@@ -1,27 +1,39 @@
+// backend/routes/productos.js
 const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
+const { pool } = require('../db/connection');
 
+// Ruta para obtener productos (con filtros opcionales)
 router.get('/', async (req, res) => {
   try {
-    const pool = await sql.connect({
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      server: process.env.DB_SERVER,
-      database: process.env.DB_NAME,
-      port: parseInt(process.env.DB_PORT),
-      options: {
-        encrypt: false,
-        trustServerCertificate: true
+    let query = 'SELECT * FROM Productos';
+    const { categoria, search } = req.query;
+
+    if (categoria || search) {
+      query += ' WHERE';
+      const conditions = [];
+
+      if (categoria) {
+        conditions.push(` categoria = @categoria `);
       }
-    });
+      if (search) {
+        conditions.push(` nombre LIKE '%' + @search + '%' `);
+      }
 
-    const result = await pool.request().query('SELECT * FROM productos');
+      query += conditions.join(' AND ');
+    }
+
+    const request = pool.request();
+
+    if (categoria) request.input('categoria', sql.VarChar, categoria);
+    if (search) request.input('search', sql.VarChar, search);
+
+    const result = await request.query(query);
     res.json(result.recordset);
-
-  } catch (error) {
-    console.error('❌ Error al obtener productos:', error.message);
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    console.error('❌ Error al obtener productos:', err.message);
+    res.status(500).send('Error al obtener productos');
   }
 });
 

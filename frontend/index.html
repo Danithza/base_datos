@@ -1,24 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="styles.css">
-  <title>Document</title>
+  <meta charset="UTF-8" />
+  <title>Test de Redirección</title>
 </head>
-  <body>
-    <button onclick="logout()">Cerrar sesión</button>
-  
-    <div id="vista-admin" style="display:none;">
-      <h2>Panel de Inventario</h2>
-      <ul id="productos-admin"></ul>
-    </div>
-  
-    <div id="vista-cliente" style="display:none;">
-      <h2>Tienda ZapaSneakers</h2>
-      <ul id="productos-cliente"></ul>
-    </div>
-  
-    <script src="script.js"></script>
-  </body>
-</html>>
+<body>
+  <h1>Selecciona vista</h1>
+  <button onclick="setRol('cliente')">Cliente</button>
+  <button onclick="setRol('admin')">Admin</button>
+
+  <script>
+    function setRol(rol) {
+      localStorage.setItem('rol', rol);
+      window.location.href = rol === 'admin' ? 'admin.html' : 'cliente.html';
+    }
+  </script>
+</body>
+</html>

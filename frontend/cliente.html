@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tienda - ZapaSneakers</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #0f0f10; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .card:hover { transform: scale(1.05); box-shadow: 0 0 15px #00bcd4aa; }
+  </style>
+</head>
+<body class="text-white">
+
+  <nav class="flex justify-between items-center px-10 py-6 border-b border-gray-800">
+    <div class="text-3xl font-extrabold text-cyan-400 tracking-wider">ZAPASNEAKERS</div>
+    <span class="text-gray-300">Rol: Cliente</span>
+    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">Cerrar sesión</button>
+
+    <!-- Botón para ver el carrito -->
+    <button onclick="verCarrito()" class="bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-4 rounded ml-4">
+      🛒 Ver carrito <span id="carrito-count">0</span>
+    </button>
+  </nav>
+
+  <div class="px-10 py-4 flex justify-between items-center">
+    <select id="categoria" class="p-2 bg-gray-800 text-white rounded-lg">
+      <option value="">Filtrar por categoría</option>
+      <option value="Deportivas">Deportivas</option>
+      <option value="Casuales">Casuales</option>
+      <option value="Formales">Formales</option>
+    </select>
+    <input type="text" id="buscar" placeholder="Buscar producto..." class="p-2 bg-gray-800 text-white rounded-lg" />
+  </div>
+
+  <div class="px-10 py-16">
+    <h2 class="text-3xl font-bold mb-8 text-cyan-400">Tienda ZapaSneakers</h2>
+    <ul id="productos-cliente" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"></ul>
+  </div>
+
+  <footer class="text-center text-gray-500 py-8 border-t border-gray-800">
+    <p>&copy; 2025 ZapaSneakers. Todos los derechos reservados.</p>
+  </footer>
+
+  <!-- Modal del carrito -->
+  <div id="modal-carrito" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+    <div class="bg-white text-black p-8 rounded-lg w-96">
+      <h2 class="text-xl font-bold mb-4">Carrito de Compras</h2>
+      <ul id="lista-carrito" class="space-y-2"></ul>
+      <button onclick="cerrarCarrito()" class="mt-4 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">Cerrar</button>
+      <button onclick="realizarCompra()" class="mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">Comprar</button>
+    </div>
+  </div>
+
+  <script>
+    let carrito = [];
+
+    window.addEventListener('DOMContentLoaded', cargarProductosCliente);
+    document.getElementById('categoria').addEventListener('change', cargarProductosCliente);
+    document.getElementById('buscar').addEventListener('input', cargarProductosCliente);
+
+    async function cargarProductosCliente() {
+      const categoria = document.getElementById('categoria').value;
+      const searchQuery = document.getElementById('buscar').value;
+      let url = `http://localhost:3000/api/productos?categoria=${categoria}`;
+      if (searchQuery) url += `&search=${searchQuery}`;
+
+      try {
+        const res = await fetch(url);
+        const productos = await res.json();
+        const lista = document.getElementById('productos-cliente');
+        lista.innerHTML = '';
+        productos.forEach(p => {
+          const card = document.createElement('li');
+          card.className = 'card bg-gray-900 p-6 rounded-lg shadow-lg';
+          card.innerHTML = `
+            <h3 class="text-xl font-bold mb-2 text-cyan-300">${p.nombre}</h3>
+            <p class="text-gray-400">Precio: <strong>$${p.precio}</strong></p>
+            <p class="text-gray-400">Categoría: <strong>${p.categoria}</strong></p>
+            <img src="${p.imagen}" alt="${p.nombre}" class="w-full h-40 object-cover mb-4"/>
+            <p class="text-gray-400">Cantidad disponible: <strong>${p.stock}</strong></p>
+            ${p.stock <= 5 ? `<p class="text-red-500">¡Quedan solo ${p.stock} unidades!</p>` : ''}
+            <button onclick="agregarAlCarrito('${p.id}', 1)" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">Agregar al carrito</button>
+          `;
+          lista.appendChild(card);
+        });
+      } catch (err) {
+        console.error('Error cargando productos:', err);
+      }
+    }
+
+    async function agregarAlCarrito(idProducto, cantidad) {
+      // Busca si ya está en el carrito
+      const index = carrito.findIndex(p => p.idProducto === idProducto);
+      if (index >= 0) {
+        carrito[index].cantidad += cantidad;
+      } else {
+        carrito.push({ idProducto, cantidad });
+      }
+
+      // Actualiza el contador de carrito
+      document.getElementById('carrito-count').textContent = carrito.length;
+
+      alert('Producto agregado al carrito');
+    }
+
+    function verCarrito() {
+      const lista = document.getElementById('lista-carrito');
+      lista.innerHTML = '';
+
+      if (carrito.length === 0) {
+        lista.innerHTML = '<li>El carrito está vacío.</li>';
+      } else {
+        carrito.forEach(item => {
+          lista.innerHTML += `<li>ID Producto: ${item.idProducto}, Cantidad: ${item.cantidad}</li>`;
+        });
+      }
+
+      document.getElementById('modal-carrito').classList.remove('hidden');
+    }
+
+    function cerrarCarrito() {
+      document.getElementById('modal-carrito').classList.add('hidden');
+    }
+
+    function realizarCompra() {
+      if (carrito.length === 0) {
+        alert('El carrito está vacío');
+        return;
+      }
+
+      // Simula la compra, puedes hacer una llamada a la API de tu backend aquí
+      alert('Compra realizada con éxito');
+      carrito = []; // Vaciar el carrito
+      document.getElementById('carrito-count').textContent = 0; // Reiniciar el contador
+      cerrarCarrito(); // Cerrar el carrito
+    }
+
+    function logout() {
+      localStorage.removeItem('rol');
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

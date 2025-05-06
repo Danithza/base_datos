@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Admin - ZapaSneakers</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #0f0f10; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .card:hover { transform: scale(1.05); box-shadow: 0 0 15px #00bcd4aa; }
+  </style>
+</head>
+<body class="text-white">
+  <nav class="flex justify-between items-center px-10 py-6 border-b border-gray-800">
+    <div class="text-3xl font-extrabold text-cyan-400 tracking-wider">ZAPASNEAKERS - ADMIN</div>
+    <span class="text-gray-300">Rol: Administrador</span>
+    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">Cerrar sesión</button>
+  </nav>
+
+  <div class="px-10 py-16">
+    <h2 class="text-3xl font-bold mb-8 text-cyan-400">Inventario</h2>
+    <ul id="productos-admin" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"></ul>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', cargarProductosAdmin);
+
+    async function cargarProductosAdmin() {
+      try {
+        const res = await fetch('http://localhost:3000/api/productos');
+        const productos = await res.json();
+        const lista = document.getElementById('productos-admin');
+        lista.innerHTML = '';
+        productos.forEach(p => {
+          const card = document.createElement('li');
+          card.className = 'card bg-gray-900 p-6 rounded-lg shadow-lg';
+          card.innerHTML = `
+            <h3 class="text-xl font-bold mb-2 text-cyan-300">${p.nombre}</h3>
+            <p class="text-gray-400">Cantidad en stock: <strong>${p.stock}</strong></p>
+            <p class="text-gray-400">Categoría: <strong>${p.categoria}</strong></p>
+            <img src="${p.imagen}" alt="${p.nombre}" class="w-full h-40 object-cover mt-2"/>
+          `;
+          lista.appendChild(card);
+        });
+      } catch (err) {
+        console.error('Error cargando inventario:', err);
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('rol');
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>
