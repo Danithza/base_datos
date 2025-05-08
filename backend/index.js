@@ -13,8 +13,7 @@ app.use(cors());
 // Middleware para JSON
 app.use(express.json());
 
-// Servir archivos estáticos del frontend
-app.use(express.static(path.join(__dirname, '../frontend')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Conexión a la base de datos
 poolConnect

@@ -3,55 +3,132 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel Admin - ZapaSneakers</title>
+  <title>Inventario - ZapaSneakers</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    body { background-color: #0f0f10; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     .card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-    .card:hover { transform: scale(1.05); box-shadow: 0 0 15px #00bcd4aa; }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); }
+    .header { background-color: #ffffff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); }
+    .btn-primary { background-color: #3b82f6; }
+    .btn-primary:hover { background-color: #2563eb; }
+    .btn-danger { background-color: #ef4444; }
+    .btn-danger:hover { background-color: #dc2626; }
+    .btn-warning { background-color: #f59e0b; }
+    .btn-warning:hover { background-color: #d97706; }
+    .animate-fadeIn {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
-<body class="text-white">
-  <nav class="flex justify-between items-center px-10 py-6 border-b border-gray-800">
-    <div class="text-3xl font-extrabold text-cyan-400 tracking-wider">ZAPASNEAKERS - ADMIN</div>
-    <span class="text-gray-300">Rol: Administrador</span>
-    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">Cerrar sesión</button>
+<body class="text-gray-800">
+  <nav class="flex justify-between items-center px-10 py-6 header">
+    <div class="text-2xl font-bold text-blue-600 tracking-wide">INVENTARIO ZAPASNEAKERS</div>
+    <div class="flex items-center space-x-4">
+      <span id="rol-label" class="text-gray-600" aria-label="Rol del usuario"></span>
+      <button type="button" onclick="logout()" class="btn-danger text-white py-2 px-4 rounded-lg font-medium">Cerrar sesión</button>
+    </div>
   </nav>
 
-  <div class="px-10 py-16">
-    <h2 class="text-3xl font-bold mb-8 text-cyan-400">Inventario</h2>
-    <ul id="productos-admin" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"></ul>
+  <main class="container mx-auto px-6 py-8">
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-800">Gestión de Inventario</h1>
+      <button id="btn-agregar" type="button" class="btn-primary text-white py-2 px-6 rounded-lg font-medium flex items-center">
+        <i class="fas fa-plus mr-2" aria-hidden="true"></i> Añadir Producto
+      </button>
+    </div>
+
+    <div id="error-message" class="hidden mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert"></div>
+    <div id="success-message" class="hidden mb-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4" role="alert"></div>
+
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+      <div class="grid grid-cols-12 bg-gray-100 p-4 font-medium text-gray-700">
+        <div class="col-span-4">Producto</div>
+        <div class="col-span-2 text-center">Stock</div>
+        <div class="col-span-2 text-center">Categoría</div>
+        <div class="col-span-2 text-center">Precio</div>
+        <div class="col-span-2 text-center">Acciones</div>
+      </div>
+      
+      <ul id="productos-admin" class="divide-y divide-gray-200">
+        <!-- Productos dinámicos -->
+      </ul>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="modal-form" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 animate-fadeIn" aria-modal="true" role="dialog">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl">
+      <div class="flex justify-between items-center border-b p-4">
+        <h3 id="form-titulo" class="text-xl font-bold text-gray-800">Agregar Nuevo Producto</h3>
+        <button type="button" onclick="cerrarModal()" class="text-gray-500 hover:text-gray-700" aria-label="Cerrar modal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <form id="form-producto" class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-gray-700 mb-2">Nombre*</label>
+            <input type="text" name="nombre" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 mb-2">Marca</label>
+            <input type="text" name="marca" class="w-full p-3 border border-gray-300 rounded-lg">
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 mb-2">Descripción</label>
+            <textarea name="descripcion" rows="2" class="w-full p-3 border border-gray-300 rounded-lg"></textarea>
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 mb-2">Categoría*</label>
+            <select name="categoria" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+              <option value="">Selecciona una categoría</option>
+              <option value="Deportivas">Deportivas</option>
+              <option value="Running">Running</option>
+              <option value="Casual">Casual</option>
+              <option value="Basketball">Basketball</option>
+              <option value="Skate">Skate</option>
+              <option value="Senderismo">Senderismo</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 mb-2">Precio*</label>
+            <input type="number" name="precio" step="0.01" min="0" class="w-full p-3 border border-gray-300 rounded-lg" required>
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 mb-2">Stock*</label>
+            <input type="number" name="stock" min="0" class="w-full p-3 border border-gray-300 rounded-lg" required>
+          </div>
+          
+          <div class="md:col-span-2">
+            <label class="block text-gray-700 mb-2">Imagen (URL)</label>
+            <input type="text" name="ImagenUrl" class="w-full p-3 border border-gray-300 rounded-lg" value="/public/Zapatillas/default.png">
+          </div>
+        </div>
+        
+        <div class="flex justify-end space-x-3 pt-6">
+          <button type="button" onclick="cerrarModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-6 rounded-lg font-medium">
+            Cancelar
+          </button>
+          <button type="submit" id="btn-submit" class="btn-primary text-white py-2 px-6 rounded-lg font-medium">
+            Guardar
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <script>
-    window.addEventListener('DOMContentLoaded', cargarProductosAdmin);
-
-    async function cargarProductosAdmin() {
-      try {
-        const res = await fetch('http://localhost:3000/api/productos');
-        const productos = await res.json();
-        const lista = document.getElementById('productos-admin');
-        lista.innerHTML = '';
-        productos.forEach(p => {
-          const card = document.createElement('li');
-          card.className = 'card bg-gray-900 p-6 rounded-lg shadow-lg';
-          card.innerHTML = `
-            <h3 class="text-xl font-bold mb-2 text-cyan-300">${p.nombre}</h3>
-            <p class="text-gray-400">Cantidad en stock: <strong>${p.stock}</strong></p>
-            <p class="text-gray-400">Categoría: <strong>${p.categoria}</strong></p>
-            <img src="${p.imagen}" alt="${p.nombre}" class="w-full h-40 object-cover mt-2"/>
-          `;
-          lista.appendChild(card);
-        });
-      } catch (err) {
-        console.error('Error cargando inventario:', err);
-      }
-    }
-
-    function logout() {
-      localStorage.removeItem('rol');
-      window.location.href = 'index.html';
-    }
-  </script>
+  <script src="admin.js"></script>
 </body>
 </html>

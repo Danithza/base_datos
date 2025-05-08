@@ -5,10 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tienda - ZapaSneakers</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     body { background-color: #0f0f10; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     .card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-    .card:hover { transform: scale(1.05); box-shadow: 0 0 15px #00bcd4aa; }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 188, 212, 0.3); }
+    .sneaker-img { height: 200px; object-fit: contain; background: linear-gradient(to bottom, #1a1a1d, #2d2d32); }
+    .filter-section { background-color: #1a1a1d; border-radius: 10px; }
+    .price-range { accent-color: #00bcd4; }
   </style>
 </head>
 <body class="text-white">
@@ -16,131 +20,133 @@
   <nav class="flex justify-between items-center px-10 py-6 border-b border-gray-800">
     <div class="text-3xl font-extrabold text-cyan-400 tracking-wider">ZAPASNEAKERS</div>
     <span class="text-gray-300">Rol: Cliente</span>
-    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">Cerrar sesión</button>
-
-    <!-- Botón para ver el carrito -->
-    <button onclick="verCarrito()" class="bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-4 rounded ml-4">
-      🛒 Ver carrito <span id="carrito-count">0</span>
+    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded transition">Cerrar sesión</button>
+    <button onclick="verCarrito()" class="bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-4 rounded ml-4 transition flex items-center">
+      <i class="fas fa-shopping-cart mr-2"></i> 
+      <span id="carrito-count">0</span>
     </button>
   </nav>
 
-  <div class="px-10 py-4 flex justify-between items-center">
-    <select id="categoria" class="p-2 bg-gray-800 text-white rounded-lg">
-      <option value="">Filtrar por categoría</option>
-      <option value="Deportivas">Deportivas</option>
-      <option value="Casuales">Casuales</option>
-      <option value="Formales">Formales</option>
-    </select>
-    <input type="text" id="buscar" placeholder="Buscar producto..." class="p-2 bg-gray-800 text-white rounded-lg" />
-  </div>
+  <!-- Filtros -->
+  <div class="px-10 py-4 grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div class="filter-section p-4 col-span-1">
+      <h3 class="text-xl font-bold mb-4 text-cyan-400 border-b border-gray-700 pb-2">Filtros</h3>
+      <div class="mb-4">
+        <label class="block text-gray-400 mb-2">Buscar</label>
+        <input type="text" id="buscar" placeholder="Nombre, marca..." class="w-full p-2 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-cyan-500">
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-400 mb-2">Categoría</label>
+        <select id="categoria" class="w-full p-2 bg-gray-800 text-white rounded-lg">
+          <option value="">Todas las categorías</option>
+          <option value="Deportivas">Deportivas</option>
+          <option value="Casuales">Casuales</option>
+          <option value="Formales">Formales</option>
+          <option value="Running">Running</option>
+          <option value="Basketball">Basketball</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-400 mb-2">Marca</label>
+        <select id="marca" class="w-full p-2 bg-gray-800 text-white rounded-lg">
+          <option value="">Todas las marcas</option>
+          <option value="Nike">Nike</option>
+          <option value="Adidas">Adidas</option>
+          <option value="Puma">Puma</option>
+          <option value="Reebok">Reebok</option>
+          <option value="New Balance">New Balance</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-400 mb-2">Talla</label>
+        <select id="talla" class="w-full p-2 bg-gray-800 text-white rounded-lg">
+          <option value="">Todas las tallas</option>
+          <option value="36">36</option>
+          <option value="37">37</option>
+          <option value="38">38</option>
+          <option value="39">39</option>
+          <option value="40">40</option>
+          <option value="41">41</option>
+          <option value="42">42</option>
+          <option value="43">43</option>
+          <option value="44">44</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-400 mb-2">Rango de precio</label>
+        <div class="flex justify-between text-xs text-gray-400 mb-1">
+          <span>$0</span>
+          <span>$500+</span>
+        </div>
+        <input type="range" id="precio" min="0" max="500" value="500" class="w-full price-range">
+        <div class="text-right text-cyan-400 mt-1" id="precio-max">Hasta $500</div>
+      </div>
+      <button onclick="aplicarFiltros()" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-4 rounded mt-2 transition">
+        Aplicar filtros
+      </button>
+    </div>
 
-  <div class="px-10 py-16">
-    <h2 class="text-3xl font-bold mb-8 text-cyan-400">Tienda ZapaSneakers</h2>
-    <ul id="productos-cliente" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"></ul>
-  </div>
-
-  <footer class="text-center text-gray-500 py-8 border-t border-gray-800">
-    <p>&copy; 2025 ZapaSneakers. Todos los derechos reservados.</p>
-  </footer>
-
-  <!-- Modal del carrito -->
-  <div id="modal-carrito" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-    <div class="bg-white text-black p-8 rounded-lg w-96">
-      <h2 class="text-xl font-bold mb-4">Carrito de Compras</h2>
-      <ul id="lista-carrito" class="space-y-2"></ul>
-      <button onclick="cerrarCarrito()" class="mt-4 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">Cerrar</button>
-      <button onclick="realizarCompra()" class="mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">Comprar</button>
+    <!-- Productos -->
+    <div class="col-span-3">
+      <h2 class="text-3xl font-bold mb-8 text-cyan-400">Catálogo de Zapatillas</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="productos-cliente"></div>
     </div>
   </div>
 
-  <script>
-    let carrito = [];
 
-    window.addEventListener('DOMContentLoaded', cargarProductosCliente);
-    document.getElementById('categoria').addEventListener('change', cargarProductosCliente);
-    document.getElementById('buscar').addEventListener('input', cargarProductosCliente);
+  <!-- Footer -->
+  <footer class="text-center text-gray-500 py-8 border-t border-gray-800 mt-12">
+    <p>&copy; 2025 ZapaSneakers. Todos los derechos reservados.</p>
+  </footer>
 
-    async function cargarProductosCliente() {
-      const categoria = document.getElementById('categoria').value;
-      const searchQuery = document.getElementById('buscar').value;
-      let url = `http://localhost:3000/api/productos?categoria=${categoria}`;
-      if (searchQuery) url += `&search=${searchQuery}`;
+  <!-- Modales (Carrito y Detalle) -->
+  <div id="modal-carrito" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+    <div class="bg-gray-900 text-white p-8 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-cyan-400">Tu Carrito</h2>
+        <button onclick="cerrarCarrito()" class="text-gray-400 hover:text-white">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div id="lista-carrito" class="space-y-4"></div>
+      <div class="mt-6 pt-4 border-t border-gray-700">
+        <div class="flex justify-between text-lg font-bold mb-4">
+          <span>Total:</span>
+          <span id="carrito-total">$0</span>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <button onclick="cerrarCarrito()" class="bg-gray-700 hover:bg-gray-600 text-white py-3 px-4 rounded transition">
+            Seguir comprando
+          </button>
+          <button onclick="realizarCompra()" class="bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded transition">
+            Finalizar compra
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      try {
-        const res = await fetch(url);
-        const productos = await res.json();
-        const lista = document.getElementById('productos-cliente');
-        lista.innerHTML = '';
-        productos.forEach(p => {
-          const card = document.createElement('li');
-          card.className = 'card bg-gray-900 p-6 rounded-lg shadow-lg';
-          card.innerHTML = `
-            <h3 class="text-xl font-bold mb-2 text-cyan-300">${p.nombre}</h3>
-            <p class="text-gray-400">Precio: <strong>$${p.precio}</strong></p>
-            <p class="text-gray-400">Categoría: <strong>${p.categoria}</strong></p>
-            <img src="${p.imagen}" alt="${p.nombre}" class="w-full h-40 object-cover mb-4"/>
-            <p class="text-gray-400">Cantidad disponible: <strong>${p.stock}</strong></p>
-            ${p.stock <= 5 ? `<p class="text-red-500">¡Quedan solo ${p.stock} unidades!</p>` : ''}
-            <button onclick="agregarAlCarrito('${p.id}', 1)" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">Agregar al carrito</button>
-          `;
-          lista.appendChild(card);
-        });
-      } catch (err) {
-        console.error('Error cargando productos:', err);
-      }
-    }
-
-    async function agregarAlCarrito(idProducto, cantidad) {
-      // Busca si ya está en el carrito
-      const index = carrito.findIndex(p => p.idProducto === idProducto);
-      if (index >= 0) {
-        carrito[index].cantidad += cantidad;
-      } else {
-        carrito.push({ idProducto, cantidad });
-      }
-
-      // Actualiza el contador de carrito
-      document.getElementById('carrito-count').textContent = carrito.length;
-
-      alert('Producto agregado al carrito');
-    }
-
-    function verCarrito() {
-      const lista = document.getElementById('lista-carrito');
-      lista.innerHTML = '';
-
-      if (carrito.length === 0) {
-        lista.innerHTML = '<li>El carrito está vacío.</li>';
-      } else {
-        carrito.forEach(item => {
-          lista.innerHTML += `<li>ID Producto: ${item.idProducto}, Cantidad: ${item.cantidad}</li>`;
-        });
-      }
-
-      document.getElementById('modal-carrito').classList.remove('hidden');
-    }
-
-    function cerrarCarrito() {
-      document.getElementById('modal-carrito').classList.add('hidden');
-    }
-
-    function realizarCompra() {
-      if (carrito.length === 0) {
-        alert('El carrito está vacío');
-        return;
-      }
-
-      // Simula la compra, puedes hacer una llamada a la API de tu backend aquí
-      alert('Compra realizada con éxito');
-      carrito = []; // Vaciar el carrito
-      document.getElementById('carrito-count').textContent = 0; // Reiniciar el contador
-      cerrarCarrito(); // Cerrar el carrito
-    }
-
-    function logout() {
-      localStorage.removeItem('rol');
-      window.location.href = 'index.html';
-    }
-  </script>
+  <div id="modal-detalle" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+    <div class="bg-gray-900 text-white p-6 rounded-lg w-full max-w-lg relative">
+      <button onclick="cerrarDetalle()" class="absolute top-2 right-2 text-gray-400 hover:text-white text-xl">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="flex flex-col md:flex-row gap-6">
+        <img id="detalle-imagen" src="" alt="Producto" class="w-full md:w-1/2 rounded bg-gray-800 object-cover h-64" />
+        <div class="flex flex-col gap-2 flex-1">
+          <h2 id="detalle-nombre" class="text-2xl font-bold text-cyan-400"></h2>
+          <p id="detalle-descripcion" class="text-gray-400 text-sm"></p>
+          <p class="text-lg mt-2">Marca: <span id="detalle-marca" class="text-cyan-300"></span></p>
+          <p class="text-lg">Precio: <span id="detalle-precio" class="font-bold"></span></p>
+          <p class="text-sm text-red-400" id="detalle-stock"></p>
+          <button id="btn-agregar-detalle" class="mt-4 bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-4 rounded transition">
+            <i class="fas fa-cart-plus mr-2"></i> Agregar al carrito
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Script -->
+  <script src="cliente.js"></script>
 </body>
 </html>

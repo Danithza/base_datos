@@ -2,18 +2,230 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Test de Redirección</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selección de Perfil</title>
+  <style>
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+    }
+    
+    .container {
+      text-align: center;
+      max-width: 800px;
+      padding: 2rem;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 2rem;
+      font-size: 2.2rem;
+    }
+    
+    .subtitle {
+      color: #7f8c8d;
+      margin-bottom: 3rem;
+      font-size: 1.1rem;
+    }
+    
+    .roles-container {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .role-card {
+      background: white;
+      border-radius: 10px;
+      padding: 2rem;
+      width: 250px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid #e0e0e0;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .role-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      border-color: #3498db;
+    }
+    
+    .role-card.admin:hover {
+      border-color: #e74c3c;
+    }
+    
+    .role-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #3498db;
+    }
+    
+    .role-card.admin .role-icon {
+      color: #e74c3c;
+    }
+    
+    .role-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #2c3e50;
+    }
+    
+    .role-description {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .footer {
+      margin-top: 3rem;
+      color: #95a5a6;
+      font-size: 0.8rem;
+    }
+    
+    /* Estilos para el modal de contraseña */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .modal h2 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+    
+    .modal input {
+      width: 100%;
+      padding: 10px;
+      margin: 15px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+    
+    .modal button {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    
+    .modal button.cancel {
+      background-color: #95a5a6;
+    }
+    
+    .error-message {
+      color: #e74c3c;
+      font-size: 0.8rem;
+      margin-top: 5px;
+      display: none;
+    }
+  </style>
 </head>
 <body>
-  <h1>Selecciona vista</h1>
-  <button onclick="setRol('cliente')">Cliente</button>
-  <button onclick="setRol('admin')">Admin</button>
+  <div class="container">
+    <h1>Bienvenido al Sistema</h1>
+    <p class="subtitle">Por favor, selecciona tu perfil para continuar</p>
+    
+    <div class="roles-container">
+      <div class="role-card" onclick="setRol('cliente')">
+        <div class="role-icon">👤</div>
+        <h2 class="role-title">Cliente</h2>
+        <p class="role-description">Accede a tu cuenta personal para gestionar tus pedidos, facturas y datos personales.</p>
+        <button class="role-button">Seleccionar</button>
+      </div>
+      
+      <div class="role-card admin" onclick="showPasswordModal()">
+        <div class="role-icon">👔</div>
+        <h2 class="role-title">Administrador</h2>
+        <p class="role-description">Accede al panel de administración para gestionar usuarios, configuraciones y estadísticas.</p>
+        <button class="role-button">Seleccionar</button>
+      </div>
+    </div>
+    
+    <p class="footer">Si tienes dudas sobre qué perfil seleccionar, contacta con soporte técnico.</p>
+  </div>
+
+  <!-- Modal para contraseña de administrador -->
+  <div id="passwordModal" class="modal">
+    <div class="modal-content">
+      <h2>Acceso Administrador</h2>
+      <p>Por favor, introduce la contraseña:</p>
+      <input type="password" id="adminPassword" placeholder="Contraseña">
+      <p id="errorMessage" class="error-message">Contraseña incorrecta. Inténtalo de nuevo.</p>
+      <button onclick="checkPassword()">Acceder</button>
+      <button class="cancel" onclick="hidePasswordModal()">Cancelar</button>
+    </div>
+  </div>
 
   <script>
     function setRol(rol) {
       localStorage.setItem('rol', rol);
       window.location.href = rol === 'admin' ? 'admin.html' : 'cliente.html';
     }
+    
+    function showPasswordModal() {
+      document.getElementById('passwordModal').style.display = 'flex';
+      document.getElementById('adminPassword').focus();
+      document.getElementById('errorMessage').style.display = 'none';
+    }
+    
+    function hidePasswordModal() {
+      document.getElementById('passwordModal').style.display = 'none';
+      document.getElementById('adminPassword').value = '';
+    }
+    
+    function checkPassword() {
+      const password = document.getElementById('adminPassword').value;
+      const errorMessage = document.getElementById('errorMessage');
+      
+      if(password === '123456') {
+        setRol('admin');
+      } else {
+        errorMessage.style.display = 'block';
+        document.getElementById('adminPassword').value = '';
+        document.getElementById('adminPassword').focus();
+      }
+    }
+    
+    // Permitir enviar con Enter
+    document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+      if(e.key === 'Enter') {
+        checkPassword();
+      }
+    });
   </script>
 </body>
 </html>
